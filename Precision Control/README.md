@@ -141,7 +141,7 @@ The FFT was analyzed for the triangle signals from 1kHz to 50kHz and it was seen
 
 | RefDes | Value    | Mouser Part Num       | Quantity  | Link																														|
 | ------ |:--------:|:---------------------:|:---------:|:-------------------------------------------------------------------------------------------------------------------------:|
-| R2     | 1M	    | CAP_0805              | 1         | https://www.mouser.com/ProductDetail/Yageo/CFR-25JT-52-1M/?qs=sGAEpiMZZMtlubZbdhIBIFoOGUvNp40aH4%2fXjzEg6fE%3d 			|
+| R2     | 1M	    | 603-CFR-25JT-52-1M    | 1         | https://www.mouser.com/ProductDetail/Yageo/CFR-25JT-52-1M/?qs=sGAEpiMZZMtlubZbdhIBIFoOGUvNp40aH4%2fXjzEg6fE%3d 			|
 | C1     | 1nF	    | 810-FA28NP2E102JNU06  | 1         | https://www.mouser.com/ProductDetail/TDK/FA28NP02E102JNU06/?qs=sGAEpiMZZMve4%2fbfQkoj%252bHofqeEQ2hNHbu6InFcxQFI%3d 		|
 | U1     |   		| 595-LM324N      		| 1         | https://www.mouser.com/ProductDetail/Texas-Instruments/LM324N/?qs=sGAEpiMZZMtYFXwiBRPs064tWv%252b77%2fgq 					|
 | R3     | 2k       | 603-CFR-12JB-52-2K    | 9         | https://www.mouser.com/ProductDetail/Yageo/CFR-12JB-52-2K/?qs=sGAEpiMZZMs1xdPSgahjwodw6f03aihdMygO9ioAXR4%3d 				|
