@@ -11,7 +11,7 @@ This is still less that the 6mA current draw limit for the MSP430 so the microco
 The relay was replaced with a MOSFET and the current running through the circuit was 3.4mA. The gate of the MOSFET draws zero current ideally so this contributes to the decrease in current draw.
 The MOSFET could also switch faster at a lower turn on voltage compared to the relay.
 
-![alt text](images/lowside.png "Low Side Switch") 
+![alt text](images/lowSide.png "Low Side Switch") 
 
 ## Best Solution
 A MOSFET would be the best solution because there is almost no current draw on the gate from the MSP and because it switches faster since it isn't electromechanical.
