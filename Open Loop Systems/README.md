@@ -4,17 +4,19 @@ Believe it or not, up to this point, any time that you have wanted to control yo
 ## Voltage Regulator
 You will need to take a 5V regulator from the back of the lab and drop the output across a 100 ohm power resistor (1 watt should do the trick). The input to the voltage regulator will be between 15-20V. I am giving you a range because when it is dropping a ton of voltage, it may not be able to cool it off enough with just a fan. Most of the voltage regulators in the back will have a tab on the top which we can place a thermistor to. If provided, you can use that tab, or place a through-hole thermistor making contact to the component on your board.
 
+### Regulator Voltage
 ![alt text](images/regulator.jpg "regulator")
-Regulator Voltage
+
 
 ## Fan Control
 It will be up to you, the engineer, to decide which method you want to use to control the DC fan. Most of these fans run off of 5V, and as such can not directly be driven by your microcontroller. Depending on the type of fan you use, some can take in a PWM control signal, others will need to have the voltage be modified. Since we are not providing you with any mechanical mounts, you are free to place the fan in whatever orientation you wish, so long as it is safe to operate.
 
+### Room Temperature
 ![alt text](images/roomTemp.jpg "roomtemp")
-Room Temperature
 
+### Fan Setup
 ![alt text](images/fanSetup.jpg "Fansetup")
-Fan Setup
+
 
 ## Temperature Reading
 It would be really useful to see what the temperature of your system is so you can determine the performance of your system. This can be done either by displaying the current temperature over a display, passing the information over UART, or other ways as well. Remember that UART is Asynchronous, meaning that you can send information whenever you would like from your controller back to a PC, it doesn't have to be reactionary. If you used MATLAB in Lab 5, you could even plot the temperature over time which could be extremely useful in figuring out whether your system is actually doing something. 
