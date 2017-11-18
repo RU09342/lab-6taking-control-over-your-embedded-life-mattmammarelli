@@ -7,6 +7,9 @@ The MSP430G2553 was used to output a PWM signal to the 12V relay in order to con
 It was found that the turn on voltage where the relay would switch was 7V. When the relay was turned on, the current through the circuit was measured to be 5.2mA.
 This is still less that the 6mA current draw limit for the MSP430 so the microcontroller wasn't damaged. 
 
+### Pwm Graph
+![alt text](images/pwmGraph.JPG "pwm") 
+
 ## MOSFET Switching
 The relay was replaced with a MOSFET and the current running through the circuit was 3.4mA. The gate of the MOSFET draws zero current ideally so this contributes to the decrease in current draw.
 The MOSFET could also switch faster at a lower turn on voltage compared to the relay.
