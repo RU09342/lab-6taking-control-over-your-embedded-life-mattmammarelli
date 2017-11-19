@@ -74,7 +74,7 @@ ECE 09342-2
 */
 
 //Open Loop Control MSP430F5529
-//Receives a duty cycle over UART, sends the pwm over GPIO pin 1.2
+//Receives a temperature over UART, converts to a pwm, sends the pwm over GPIO pin 1.2
 //Receives temperature from ADC12, puts into array of values 
 //Transmits temperature over UART when Timer B ISR fires, about every 1 second
 
@@ -82,10 +82,12 @@ ECE 09342-2
 
 #include <msp430f5529.h>
 
+int toPWM(int); //converts temp to pwm
 
-int pwm=0; //holds UART values for current rgb
+int pwm=0; //pwm value
 int temp[10]; //array to hold temperatures
 int count =0; //iterates through temperature array
+int tempCel=0;
 
 void main(void)
 {
@@ -183,10 +185,12 @@ __interrupt void USCI_A0_ISR(void)
   case 2:{
       while (!(UCA0IFG&UCTXIFG));  // USCI_A0 TX buffer check
 
+      tempCel = UCA0RXBUF;
 
-      pwm = UCA0RXBUF;
+
+      //pwm = UCA0RXBUF;
       // CCR1 PWM duty cycle
-      TA0CCR1 = pwm * 4;
+      TA0CCR1 = toPWM(tempCel)* 4;
       //UCA0TXBUF = temp;
 
       break;
@@ -217,7 +221,7 @@ void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12_ISR (void)
 
 
       temp[count] = ADC12MEM0; //changes duty cycle
-	  //iterates count for temp array
+      //iterates count for temp array
       if(count<10){
           count++;
       }
@@ -243,6 +247,42 @@ void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12_ISR (void)
   case 34: break;                           // Vector 34:  ADC12IFG14
   default: break;
   }
+}
+
+//converts temperature to PWM
+//Enter temp from 25 to 29
+
+int toPWM (int temp){
+
+
+    switch (temp){
+    case 25:{
+        pwm = 0x00;
+        break;
+    }
+    case 26:{
+        pwm = 0x4D;
+        break;
+    }
+    case 27:{
+        pwm = 0x9A;
+        break;
+    }
+    case 28:{
+        pwm = 0xB3;
+        break;
+    }
+    case 29:{
+        pwm = 0x5D;
+        break;
+    }
+
+
+
+    }
+
+    return pwm;
+
 }
 
 
