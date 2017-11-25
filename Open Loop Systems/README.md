@@ -32,9 +32,11 @@ The room temperature was measured at a standard 22.2C.
 An ADC input was used on the MSP430F5529 to read in the temperature values from the LM35 and displayed over UART.
 
 
-![alt text](images/roomTemp.jpg "roomtemp")
+![alt text](images/UARTMultiScreen.JPG "roomtemp")
 
 Temperature Sensor was set so it was touching the 5V regulator to increase its accuracy and response time.
+See tempIncreaseTime.mp4 to see temperature increasing with time. See images/tempDecreaseFan.mp4 for temperature decrease with fan.
+
 
 
 ## System Modeling
