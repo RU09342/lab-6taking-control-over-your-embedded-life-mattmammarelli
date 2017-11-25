@@ -5,7 +5,8 @@ These devices can help prevent damage to a microcontroller by preventing a direc
 ## Relay Switching
 The MSP430G2553 was used to output a PWM signal to the 12V relay in order to control the voltage dropped across a power resistor.
 It was found that the turn on voltage where the relay would switch was 7V. When the relay was turned on, the current through the circuit was measured to be 5.2mA.
-This is still less that the 6mA current draw limit for the MSP430 so the microcontroller wasn't damaged. 
+This is still less that the 6mA current draw limit for the MSP430 so the microcontroller wasn't damaged.
+It was found that the relay could switch up to 60Hz reliably. 
 
 ### Pwm Graph
 ![alt text](images/pwmGraph.JPG "pwm") 
