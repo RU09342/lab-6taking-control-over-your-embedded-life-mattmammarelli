@@ -5,8 +5,8 @@ This system does not require feedback from the temperature sensor for error corr
 ## Voltage Regulator
 A 5V Regulator was used with a 12V input and a 50 ohm load so it would heat up.
 
-### Regulator Voltage
-![alt text](images/regulator.jpg "regulator")
+### 5V Regulator Voltage
+![alt text](images/regulator.png "regulator")
 
 Shows that the regulator is outputting 5V.
 
