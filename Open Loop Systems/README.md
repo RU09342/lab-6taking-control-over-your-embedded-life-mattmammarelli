@@ -44,13 +44,23 @@ This steady state was recorded and a graph was created for each Duty Cycle.
 
 ![alt text](images/tempvsDuty.png "tempduty")
 
+Graph for Duty Cycle inputs
+
 ![alt text](images/dutyvsTemp.png "dutyTemp")
+
+Graph for Temperature inputs
 
 ![alt text](images/dutyvsTemp3240.png "dutyTemp3240")
 
+Line fit for Temperature inputs 32 to 40
+
 ![alt text](images/dutyvsTemp4146.png "dutyTemp4146")
 
+Line fit for Temperature inputs 41 to 46
+
 ![alt text](images/dutyvsTemp4675.png "dutyTemp4675")
+
+Line fit for Temperature inputs 46 to 75
 
 ## Schematics
 
