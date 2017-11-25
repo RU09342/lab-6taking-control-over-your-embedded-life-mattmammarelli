@@ -3,7 +3,7 @@ This Open loop system will receive a temperature over UART, convert it to a duty
 This system does not require feedback from the temperature sensor for error correction.
 
 ## Voltage Regulator
-A 5V Regulator was used with a 12V input and a 50 ohm load so it would heat up.
+A 5V Regulator was used with a 20V input and a 11 ohm load with three 33 ohm resistors in parallel so it would heat up.
 
 ### 5V Regulator Voltage
 ![alt text](images/regulator.png "regulator")
