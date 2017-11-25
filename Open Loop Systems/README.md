@@ -45,7 +45,7 @@ This steady state was recorded and a graph was created for each Duty Cycle.
 ### Graph for Duty Cycle inputs
 ![alt text](images/tempvsDuty.png "tempduty")
 
-### Graph for Temperature inputs
+### Graph for Temperature inputs for every 20% increase in Duty Cycle
 ![alt text](images/dutyvsTemp.png "dutyTemp")
 
 ### Line fit for Temperature inputs 32 to 40
