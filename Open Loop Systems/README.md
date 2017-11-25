@@ -28,13 +28,8 @@ The room temperature was measured at a standard 22.2C.
 ![alt text](images/fanSetup.jpg "Fansetup")
 
 
-
-
 ## Temperature Reading UART
 An ADC input was used on the MSP430F5529 to read in the temperature values from the LM35 and displayed over UART.
-
-
-
 
 
 ![alt text](images/roomTemp.jpg "roomtemp")
@@ -42,52 +37,119 @@ An ADC input was used on the MSP430F5529 to read in the temperature values from 
 Temperature Sensor was set so it was touching the 5V regulator to increase its accuracy and response time.
 
 
-
-
-
 ## System Modeling
 In order to model this system, a relationship between temperature and PWM had to be established.
 This was accomplished by setting the PWM percentage in increments of 10% and waiting until the LM35 reached a steady state.
 This steady state was recorded and a graph was created for each Duty Cycle.
 
-![alt text](images/tempDutyGraph.png "tempduty")
+![alt text](images/tempvsDuty.png "tempduty")
+
+![alt text](images/dutyvsTemp.png "dutyTemp")
+
+![alt text](images/dutyvsTemp3240.png "dutyTemp3240")
+
+![alt text](images/dutyvsTemp4146.png "dutyTemp4146")
+
+![alt text](images/dutyvsTemp4675.png "dutyTemp4675")
 
 ## Schematics
 
 ### Low Side Switch for PWM Fan
 ![alt text](images/lowSideSchem.png "low Side")
 
+Used to PWM the ground pin of the Fan.
+
 ### Temperature Sensor Circuit
 ![alt text](images/tempSchem.png "tempSchem")
 
-### 5V Regulator Circuit
-![alt text](images/regulatorSchem.png "regSchem")
+Used to measure temperature and output to ADC
 
+### 5V Regulator Circuit
+![alt text](images/5vReg.png "5vReg")
+
+Used to heat up 5V regulator so that the fan can cool it for the system
+
+### 12V Regulator Circuit
+
+![alt text](images/12vReg.png "5vReg")
+
+Used to convert 20V to 12V for fan.
+
+## Why MSP430F5529?
+This board has reliably transceived UART in the past and has also received ADC input in past labs so it was a natural fit for this lab.
+
+## Using the System
+Input a value from 32 to 75 over UART which indicated degree Celsius temperatures from 32 to 75.
+The fan will then change speed depending on the temperature.
 
 ## MSP430F5529 Code:
 
 ```c
+/* --COPYRIGHT--,BSD_EX
+ * Copyright (c) 2012, Texas Instruments Incorporated
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * *  Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ *
+ * *  Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * *  Neither the name of Texas Instruments Incorporated nor the names of
+ *    its contributors may be used to endorse or promote products derived
+ *    from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+ * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+ * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+ * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *******************************************************************************
+ * 
+ *                       MSP430 CODE EXAMPLE DISCLAIMER
+ *
+ * MSP430 code examples are self-contained low-level programs that typically
+ * demonstrate a single peripheral function or device feature in a highly
+ * concise manner. For this the code may rely on the device's power-on default
+ * register values and settings such as the clock configuration and care must
+ * be taken when combining code from several examples to avoid potential side
+ * effects. Also see www.ti.com/grace for a GUI- and www.ti.com/msp430ware
+ * for an API functional library-approach to peripheral configuration.
+ *
+ * --/COPYRIGHT--*//*
 /*
 Matt Mammarelli
 9/18/17
 ECE 09342-2
 */
 
-//Open Loop Control MSP430F5529
-//Receives a temperature over UART, converts to a pwm, sends the pwm over GPIO pin 1.2
-//Receives temperature from ADC12, puts into array of values 
+//Open Loop MSP430F5529
+//Receives a temperature over UART from 32 to 75, converts to a pwm, sends the pwm over GPIO pin 1.2
+//Receives temperature from ADC12, puts into temp 
 //Transmits temperature over UART when Timer B ISR fires, about every 1 second
-
+//Will convert value from LM35 into Celcius before transmitting
 
 
 #include <msp430f5529.h>
-
-int toPWM(int); //converts temp to pwm
+#include <math.h>
 
 int pwm=0; //pwm value
-int temp[10]; //array to hold temperatures
-int count =0; //iterates through temperature array
-int tempCel=0;
+int temp=0;//hold temperature received from ADC
+int tempCel=0;//temperature received from UART
+float tempC = 0;//temp converted to celsius, will be transmitted over UART
+float voltage = 0;//used in conversion to celsius
 
 void main(void)
 {
@@ -147,6 +209,7 @@ void main(void)
   //***************************************************************************************************
 
   //timer ******************************************************************************************
+
   //TA0CTL = Timer A0 Control
       //TASSEL_1 Timer_A clock source select = 01 ACLK 32k
       //MC_1 Up Mode
@@ -154,7 +217,7 @@ void main(void)
 
 
       TB0CCTL0 = 0x10; //Timer A0 in compare mode
-      TB0CCR0=32000;
+      TB0CCR0=30000;
 //***************************************************************************************************
 
   //adc
@@ -170,7 +233,8 @@ void main(void)
 #pragma vector = TIMER0_B0_VECTOR
 __interrupt void TimerB(void) //double __
 {
-UCA0TXBUF = temp[count];
+//transmits celsius temerature every second
+UCA0TXBUF = tempC;
 
 }
 
@@ -188,10 +252,24 @@ __interrupt void USCI_A0_ISR(void)
       tempCel = UCA0RXBUF;
 
 
-      //pwm = UCA0RXBUF;
-      // CCR1 PWM duty cycle
-      TA0CCR1 = toPWM(tempCel)* 4;
-      //UCA0TXBUF = temp;
+      //temperature ranges
+      //pwm set to linear functions based on excel graphs
+      if (tempCel == 32){
+          pwm = 0xFF;
+      }
+      else if (tempCel >32 && tempCel <=40){
+          pwm = (-6.375*tempCel)+409;
+      }
+      else if (tempCel >40 && tempCel <=46 ){
+          pwm = (-10.2*tempCel)+520.2;
+      }
+      else if (tempCel > 46 && tempCel <=75){
+          pwm = (-1.7586*tempCel)+131.9;
+      }
+
+
+      TA0CCR1 = pwm* 4;
+
 
       break;
 
@@ -219,18 +297,18 @@ void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12_ISR (void)
   case  4: break;                           // Vector  4:  ADC timing overflow
   case  6:                                  // Vector  6:  ADC12IFG0
 
+  {
+      temp = ADC12MEM0;
 
-      temp[count] = ADC12MEM0; //changes duty cycle
-      //iterates count for temp array
-      if(count<10){
-          count++;
-      }
-      else{
-          count=0;
-      }
+      voltage = temp* 0.00080566; //3.3/2^12 = .00080566
+      tempC = voltage / 0.01;
+
+     
 
 
     __bic_SR_register_on_exit(LPM0_bits);   // Exit active CPU
+
+  }
   case  8: break;                           // Vector  8:  ADC12IFG1
   case 10: break;                           // Vector 10:  ADC12IFG2
   case 12: break;                           // Vector 12:  ADC12IFG3
@@ -249,47 +327,6 @@ void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12_ISR (void)
   }
 }
 
-//converts temperature to PWM
-//Enter temp from 25 to 29
-
-int toPWM (int temp){
-
-
-    switch (temp){
-    case 25:{
-        pwm = 0x00;
-        break;
-    }
-    case 26:{
-        pwm = 0x4D;
-        break;
-    }
-    case 27:{
-        pwm = 0x9A;
-        break;
-    }
-    case 28:{
-        pwm = 0xB3;
-        break;
-    }
-    case 29:{
-        pwm = 0x5D;
-        break;
-    }
-
-
-
-    }
-
-    return pwm;
-
-}
-
-
 
 ```
-
-
-## Deliverables
-Your README needs to contain schematics of your system, the plot of the plot of the temperature and input voltages at the 5C steps, and a brief talk about why you chose the processor you did along with the control technique for the fan. As always, you should include a brief description of the code you generated to run the experiment. You need to also include information on how to use your control software, including what inputs it is expecting and what range of values you are expecting. At this time you are not going to need to user-proof the system, but you will for the milestone, so keep it in the back of your head.
 

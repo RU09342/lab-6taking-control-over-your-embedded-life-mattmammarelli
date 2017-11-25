@@ -42,26 +42,27 @@
  * for an API functional library-approach to peripheral configuration.
  *
  * --/COPYRIGHT--*//*
+/*
 Matt Mammarelli
 9/18/17
 ECE 09342-2
 */
 
-//Open Loop Control MSP430F5529
-//Receives a temperature over UART, converts to a pwm, sends the pwm over GPIO pin 1.2
-//Receives temperature from ADC12, puts into array of values 
+//Open Loop MSP430F5529
+//Receives a temperature over UART from 32 to 75, converts to a pwm, sends the pwm over GPIO pin 1.2
+//Receives temperature from ADC12, puts into temp 
 //Transmits temperature over UART when Timer B ISR fires, about every 1 second
-
+//Will convert value from LM35 into Celcius before transmitting
 
 
 #include <msp430f5529.h>
-
-int toPWM(int); //converts temp to pwm
+#include <math.h>
 
 int pwm=0; //pwm value
-int temp[10]; //array to hold temperatures
-int count =0; //iterates through temperature array
-int tempCel=0;
+int temp=0;//hold temperature received from ADC
+int tempCel=0;//temperature received from UART
+float tempC = 0;//temp converted to celsius, will be transmitted over UART
+float voltage = 0;//used in conversion to celsius
 
 void main(void)
 {
@@ -121,6 +122,7 @@ void main(void)
   //***************************************************************************************************
 
   //timer ******************************************************************************************
+
   //TA0CTL = Timer A0 Control
       //TASSEL_1 Timer_A clock source select = 01 ACLK 32k
       //MC_1 Up Mode
@@ -128,7 +130,7 @@ void main(void)
 
 
       TB0CCTL0 = 0x10; //Timer A0 in compare mode
-      TB0CCR0=32000;
+      TB0CCR0=30000;
 //***************************************************************************************************
 
   //adc
@@ -144,7 +146,8 @@ void main(void)
 #pragma vector = TIMER0_B0_VECTOR
 __interrupt void TimerB(void) //double __
 {
-UCA0TXBUF = temp[count];
+//transmits celsius temerature every second
+UCA0TXBUF = tempC;
 
 }
 
@@ -162,10 +165,24 @@ __interrupt void USCI_A0_ISR(void)
       tempCel = UCA0RXBUF;
 
 
-      //pwm = UCA0RXBUF;
-      // CCR1 PWM duty cycle
-      TA0CCR1 = toPWM(tempCel)* 4;
-      //UCA0TXBUF = temp;
+      //temperature ranges
+      //pwm set to linear functions based on excel graphs
+      if (tempCel == 32){
+          pwm = 0xFF;
+      }
+      else if (tempCel >32 && tempCel <=40){
+          pwm = (-6.375*tempCel)+409;
+      }
+      else if (tempCel >40 && tempCel <=46 ){
+          pwm = (-10.2*tempCel)+520.2;
+      }
+      else if (tempCel > 46 && tempCel <=75){
+          pwm = (-1.7586*tempCel)+131.9;
+      }
+
+
+      TA0CCR1 = pwm* 4;
+
 
       break;
 
@@ -193,18 +210,18 @@ void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12_ISR (void)
   case  4: break;                           // Vector  4:  ADC timing overflow
   case  6:                                  // Vector  6:  ADC12IFG0
 
+  {
+      temp = ADC12MEM0;
 
-      temp[count] = ADC12MEM0; //changes duty cycle
-      //iterates count for temp array
-      if(count<10){
-          count++;
-      }
-      else{
-          count=0;
-      }
+      voltage = temp* 0.00080566; //3.3/2^12 = .00080566
+      tempC = voltage / 0.01;
+
+     
 
 
     __bic_SR_register_on_exit(LPM0_bits);   // Exit active CPU
+
+  }
   case  8: break;                           // Vector  8:  ADC12IFG1
   case 10: break;                           // Vector 10:  ADC12IFG2
   case 12: break;                           // Vector 12:  ADC12IFG3
@@ -223,42 +240,11 @@ void __attribute__ ((interrupt(ADC12_VECTOR))) ADC12_ISR (void)
   }
 }
 
-//converts temperature to PWM
-//Enter temp from 27 to 57
-
-int toPWM (int temp){
-
-switch (temp){
-    case 27:{
-        pwm = 0x00;
-        break;
-    }
-    case 33:{
-        pwm = 0x66;
-        break;
-    }
-    case 37:{
-        pwm = 0x80;
-        break;
-    }
-    case 46:{
-        pwm = 0x9A;
-        break;
-    }
-    case 52:{
-        pwm = 0xB3;
-        break;
-    }
-    case 57:{
-         pwm = 0xFF;
-         break;
-    }
 
 
 
-    }
 
-    return pwm;
 
-}
+
+
 
