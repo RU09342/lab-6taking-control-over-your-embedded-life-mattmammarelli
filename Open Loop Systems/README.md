@@ -25,7 +25,7 @@ It was found that you can never completely turn off a PWM fan, you can just make
 The room temperature was measured at a standard 22.2C.
 
 ### Fan Setup
-![alt text](images/FanSetupFinal.jpg "Fansetup")
+![alt text](images/FanSetupFinal.JPG "Fansetup")
 
 
 ## Temperature Reading UART
