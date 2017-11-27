@@ -90,6 +90,20 @@ This board has reliably transceived UART in the past and has also received ADC i
 Input a value from 32 to 75 over UART which indicated degree Celsius temperatures from 32 to 75.
 The fan will then change speed depending on the temperature.
 
+## PWM Code Explained
+The Pulse Width Modulation (PWM) is utilized to control the speed of the 12V DC fan by changing the rate at which the ground pin is connected. When the ground pin on the fan is connected while 12V is being supplied, the fan will turn on. The PWM is first initialized in the main so that P1.2 was set as the output with a 1kHZ frequency with a reset/set hardware mode selected. In the UART interrupt vector, the pwm for the fan will be set depending on the transfer functions found in the System Modeling section. The pwm is then multiplied by four since the frequency set was about 1KHZ = PWM MAX (256)*4. 
+
+## ADC Code Explained 
+The ADC12 analog to digital converter was utilized in order to read the temperature from the LM35 temperature sensor. The ADC12 had to first be initialized where the interrupt was enabled and pin 6.0 was set as the input pin. An infinite while loop was created in the main so that the ADC12 sampling would start and then the Interrupt Service Routine (ISR) would be entered when a voltage was detected on P6.0. Inside this ISR, first the recorded temperature in the register ADC12MEM0 was stored in the variable temp. Then this value needed to be converted into a usable number in degrees Celsius. In order to perform this conversion, first the stored temperature had to be multiplied by the ADC12 incremental per milli-voltage value. This value is found by doing 3.3V/2E12 = .00080566. The result of this multiplication is stored in the variable voltage which is then divided by 0.01 which essentially multiplies the voltage by a factor of 100 to get a value in degrees Celsius stored in the variable tempC. 
+
+## UART Receiving Code Explained
+The UART for this system is initialized in the main at a 9600 baud rate. In the UART interrupt vector, when a temperature is received from the buffer, it is stored in the variable tempCel. Then tempCel is checked for a range of temperatures and the pwm for the DC fan is set according to the transfer functions found under the System Modeling section.  
+
+## UART Transmitting Code Explained
+The UART will transmit the read temperature value in degrees Celsius once every second. This is done by utilizing TIMER B. This timer is initialized in the main with a 32kHZ ACLK source with an Up MODE and a period of 30000. After about 1 second, the Timer B ISR fires and the UART will transmit the value in tempC which contains the converted value from the ADC.
+
+
+
 ## MSP430F5529 Code:
 
 ```c
